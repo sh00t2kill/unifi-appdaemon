@@ -13,6 +13,7 @@ unifi_monitor:
   pass: password
   host: host
   port: port
+  gateway_mac: <mac of usg/udmp>
   aps:
     - name: name_of_ap1
       mac: xx:xx:xx:xx:xx:xx
