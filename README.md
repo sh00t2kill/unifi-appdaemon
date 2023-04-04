@@ -1,6 +1,7 @@
 # unifi-appdaemon
 A HA AppDaemon script for unifi ap and switch status
 
+### Big ups to Holdestmade from the HA community forum who put the initial script together. I just converted it into something that has Appdaemon configuration rather than hard coded adresses and devices
 
 ## Config
 ```
