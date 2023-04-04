@@ -87,3 +87,22 @@ class UnifiAPSW(hass.Hass):
                     self.set_state(entity + "_port" + str(x+1) + "_voltage", state = poe_voltage, attributes = {"friendly_name": port_name, "device_class": "voltage", "unit_of_measurement": "V", "model": model})
                 else:
                     self.log(str(switch['name']) + ' Port ' + str(x+1) + ": NOT POE")
+
+    def update_health(self, kwargs):
+        self.log("Update Health Started")
+        client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
+        target_mac = self.args["gateway_mac"]
+        health = client.get_healthinfo()
+        wirelessclients = int(health[0]['num_user'])
+        wiredclients = int(health[3]['num_user'])
+        isp_upload = int(health[2]['xput_up'])
+        isp_download = int(health[2]['xput_down'])
+        udm_memory = health[1]['gw_system-stats']['mem']
+        udm_cpu = health[1]['gw_system-stats']['cpu']
+        self.set_state("sensor.unifi_gw_num_wireless_clients", state = wirelessclients, attributes = {"friendly_name": "Unifi Wireless Clients", "unit_of_measurement": "Clients", "icon": "mdi:access-point"})
+        self.set_state("sensor.unifi_gw_num_wired_clients", state = wiredclients, attributes = {"friendly_name": "Unifi Wired Clients", "unit_of_measurement": "Clients", "icon": "mdi:lan-connect"})
+        self.set_state("sensor.unifi_gw_isp_up", state = isp_upload, attributes = {"friendly_name": "Unifi ISP Upload", "unit_of_measurement": "Mbps", "icon": "mdi:upload"})
+        self.set_state("sensor.unifi_gw_isp_down", state = isp_download, attributes = {"friendly_name": "Unifi ISP Download", "unit_of_measurement": "Mbps", "icon": "mdi:download"})
+        self.set_state("sensor.unifi_gw_mem", state = udm_memory, attributes = {"friendly_name": "Unifi Memory", "unit_of_measurement": "%", "icon": "mdi:memory"})
+        self.set_state("sensor.unifi_gw_cpu", state = udm_cpu, attributes = {"friendly_name": "Unifi CPU", "unit_of_measurement": "%", "icon": "mdi:cpu-64-bit"})
+        self.log("Update Health Complete")
