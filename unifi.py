@@ -12,6 +12,8 @@ class UnifiAPSW(hass.Hass):
         self.run_every(self.update_aps, datetime.datetime.now(), 600)
         self.run_in(self.update_switches, 0)
         self.run_every(self.update_switches, datetime.datetime.now(), 600)
+        self.run_in(self.update_health, 0)
+        self.run_every(self.update_health, datetime.datetime.now(), 600)
         self.listen_event(self.unifi_update_event, "UNIFI_UPDATE")
 
         self.username = self.args['user']
