@@ -28,19 +28,19 @@ unifi_monitor:
 Note, appdaemon config will need to have pyunifi added as a python module
 
 
-For every AP configured:
-Create sensor for number of connected clients
-Create sensor for number of guest clients
-Create sensor for Unifi AP score
-Create binary_sensor if an update is outstanding
-Create sensor for CPU
-Create sensor for ram
-Create sensor for activity
-Create sensor for uptime
-Create sensors for 2.4/5ghz connected clients
+For every AP configured:<br>
+Create sensor for number of connected clients<br>
+Create sensor for number of guest clients<br>
+Create sensor for Unifi AP score<br>
+Create binary_sensor if an update is outstanding<br>
+Create sensor for CPU<br>
+Create sensor for ram<br>
+Create sensor for activity<br>
+Create sensor for uptime<br>
+Create sensors for 2.4/5ghz connected clients<br>
 
 
-For every switch configured
-Create binary_sensor for connected or not
-Create sensor for link speed
-If switch port is POE, create sensors for port voltage and power
+For every switch configured:<br>
+Create binary_sensor for connected or not<br>
+Create sensor for link speed<br>
+If switch port is POE, create sensors for port voltage and power<br>
