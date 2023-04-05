@@ -7,19 +7,33 @@ import datetime
 class UnifiAPSW(hass.Hass):
 
     def initialize(self):
-        self.log("Unifi AP and Switches Started")
-        self.run_in(self.update_aps, 0)
-        self.run_every(self.update_aps, datetime.datetime.now(), 600)
-        self.run_in(self.update_switches, 0)
-        self.run_every(self.update_switches, datetime.datetime.now(), 600)
-        self.run_in(self.update_health, 0)
-        self.run_every(self.update_health, datetime.datetime.now(), 600)
-        self.listen_event(self.unifi_update_event, "UNIFI_UPDATE")
 
         self.username = self.args['user']
         self.password = self.args['pass']
         self.host     = self.args['host']
         self.port     = self.args['port']
+
+        self.client = self.get_login_client()
+
+        self.log("Unifi AP and Switches Started")
+        self.log("Logging in to Unifi Controller")
+        self.run_in(self.update_aps, 0)
+        self.run_every(self.update_aps, datetime.datetime.now(), 60)
+        self.run_in(self.update_switches, 0)
+        self.run_every(self.update_switches, datetime.datetime.now(), 60)
+        self.run_in(self.update_health, 0)
+        self.run_every(self.update_health, datetime.datetime.now(), 60)
+        self.listen_event(self.unifi_update_event, "UNIFI_UPDATE")
+
+        self.run_every(self.login_client,  datetime.datetime.now(), 1200)
+
+    def login_client(self):
+        self.client = self.get_login_client()
+
+    def get_login_client(self):
+        client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
+        return client
+
 
     def unifi_update_event(self, UNIFI_UPDATE, data, kvargs):
         self.run_in(self.update_aps, 0)
@@ -27,13 +41,13 @@ class UnifiAPSW(hass.Hass):
 
     def update_aps(self, kwargs):
         self.log("Update APs Started")
+        #client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
         for ap in self.args['aps']:
             entity = "sensor.unifi_" + ap['name'] + "_ap"
-            client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
-            stat = client.get_sysinfo()
-            devs = client.get_device_stat(ap['mac'])
+            stat = self.client.get_sysinfo()
+            devs = self.client.get_device_stat(ap['mac'])
             #self.log(devs)
-            clients = client.get_clients()
+            clients = self.client.get_clients()
             numclients = int(devs['user-wlan-num_sta'])
             self.set_state(entity + "_clients", state = numclients, friendly_name = ap['name'].title() + " AP Clients", unit_of_measurement = "Clients")
             numguests = int(devs['guest-wlan-num_sta'])
@@ -72,29 +86,34 @@ class UnifiAPSW(hass.Hass):
 
     def update_switches(self, kwargs):
         self.log("Update Switches Started")
+        #client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
         for switch in self.args['switches']:
             entity = "sensor.unifi_" + switch['name']
-            client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
-            devs = client.get_device_stat(switch['mac'])
+            devs = self.client.get_device_stat(switch['mac'])
             model = devs['model']
             self.log('Switch Model: ' + model)
             for x in range(len(devs['port_table'])):
-                port_poe = devs['port_table'][x]['port_poe']
+                port = devs['port_table'][x]
+                port_poe = port['port_poe']
+                port_name = port['name']
                 if port_poe == True:
-                    port_name = devs['port_table'][x]['name']
                     poe_power = round(float(devs['port_table'][x]['poe_power']), 1)
                     poe_voltage = round(float(devs['port_table'][x]['poe_voltage']))
                     self.log(str(switch['name']) + ' Port ' + str(x+1) + ' ' + str(port_name) + ': ' + str(poe_power) + 'W' + ' ' + str(poe_voltage) + 'V')
                     self.set_state(entity + "_port" + str(x+1) + "_power", state = poe_power, attributes = {"friendly_name": port_name, "device_class": "power", "unit_of_measurement": "W", "model": model})
                     self.set_state(entity + "_port" + str(x+1) + "_voltage", state = poe_voltage, attributes = {"friendly_name": port_name, "device_class": "voltage", "unit_of_measurement": "V", "model": model})
                 else:
-                    self.log(str(switch['name']) + ' Port ' + str(x+1) + ": NOT POE")
+                    port_link_state = "on" if port['up'] == True else "off"
+                    port_speed = port['speed']
+                    self.log(str(switch['name']) + ' Port ' + str(x+1) + ' ' + str(port_name) + " is " + str(port_link_state))
+                    self.set_state("binary_" + entity + "_port" + str(x+1) + "_link", state = port_link_state, attributes = {"friendly_name": port_name, "device_class": "connectivity", "model": model})
+                    self.set_state(entity + "_port" + str(x+1) + "_speed", state = port_speed, attributes = {"friendly_name": port_name, "device_class": "connectivity", "unit_of_measurement": "Mbps", "model": model})
 
     def update_health(self, kwargs):
         self.log("Update Health Started")
-        client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
+        #client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
         target_mac = self.args["gateway_mac"]
-        health = client.get_healthinfo()
+        health = self.client.get_healthinfo()
         wirelessclients = int(health[0]['num_user'])
         wiredclients = int(health[3]['num_user'])
         isp_upload = int(health[2]['xput_up'])
