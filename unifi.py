@@ -74,14 +74,6 @@ class UnifiAPSW(hass.Hass):
             self.set_state(entity + "_5ghz_clients", state = wifi1clients, friendly_name = ap['name'].title() + " AP 5GHz Clients", unit_of_measurement = "Clients")
             self.log(entity)
             model = devs['model']
-            if model == 'UAL6':
-                picture = "/local/images/unifiap62.png"
-            elif model == 'U7IW':
-                picture = "/local/images/unifiapiw2.png"
-            elif model == 'UHDIW':
-                picture = "/local/images/unifiapiw2.png"
-            else:
-                picture = "/local/images/unifiap62.png"
             self.set_state(entity, state = numclients, attributes = {"entity_picture":picture, "Clients":numclients, "Guests":numguests, "Clients_wifi0":wifi0clients, "Clients_wifi1":wifi1clients, "Score":score, "CPU":str(cpu), "RAM":str(ram), "Uptime":uptime, "Activity":str(activity)+' Mbps', "Update":update})
 
     def update_switches(self, kwargs):
