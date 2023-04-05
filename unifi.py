@@ -102,12 +102,11 @@ class UnifiAPSW(hass.Hass):
                     self.log(str(switch['name']) + ' Port ' + str(x+1) + ' ' + str(port_name) + ': ' + str(poe_power) + 'W' + ' ' + str(poe_voltage) + 'V')
                     self.set_state(entity + "_port" + str(x+1) + "_power", state = poe_power, attributes = {"friendly_name": port_name, "device_class": "power", "unit_of_measurement": "W", "model": model})
                     self.set_state(entity + "_port" + str(x+1) + "_voltage", state = poe_voltage, attributes = {"friendly_name": port_name, "device_class": "voltage", "unit_of_measurement": "V", "model": model})
-                else:
-                    port_link_state = "on" if port['up'] == True else "off"
-                    port_speed = port['speed']
-                    self.log(str(switch['name']) + ' Port ' + str(x+1) + ' ' + str(port_name) + " is " + str(port_link_state))
-                    self.set_state("binary_" + entity + "_port" + str(x+1) + "_link", state = port_link_state, attributes = {"friendly_name": port_name, "device_class": "connectivity", "model": model})
-                    self.set_state(entity + "_port" + str(x+1) + "_speed", state = port_speed, attributes = {"friendly_name": port_name, "device_class": "connectivity", "unit_of_measurement": "Mbps", "model": model})
+                port_link_state = "on" if port['up'] == True else "off"
+                port_speed = port['speed']
+                self.log(str(switch['name']) + ' Port ' + str(x+1) + ' ' + str(port_name) + " is " + str(port_link_state))
+                self.set_state("binary_" + entity + "_port" + str(x+1) + "_link", state = port_link_state, attributes = {"friendly_name": port_name, "device_class": "connectivity", "model": model})
+                self.set_state(entity + "_port" + str(x+1) + "_speed", state = port_speed, attributes = {"friendly_name": port_name, "device_class": "connectivity", "unit_of_measurement": "Mbps", "model": model})
 
     def update_health(self, kwargs):
         self.log("Update Health Started")
