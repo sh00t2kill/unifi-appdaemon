@@ -1,4 +1,4 @@
-from pyunifi.controller import Controller
+from pyunifi.controller import Controller, APIError
 import json
 import re
 import hassapi as hass
@@ -31,7 +31,10 @@ class UnifiAPSW(hass.Hass):
         self.client = self.get_login_client()
 
     def get_login_client(self):
-        client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
+        try:
+            client = Controller(self.host, self.username, self.password, self.port, 'UDMP-unifiOS', site_id='default', ssl_verify=False)
+        except APIError:
+            client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
         return client
 
 
@@ -74,6 +77,14 @@ class UnifiAPSW(hass.Hass):
             self.set_state(entity + "_5ghz_clients", state = wifi1clients, friendly_name = ap['name'].title() + " AP 5GHz Clients", unit_of_measurement = "Clients")
             self.log(entity)
             model = devs['model']
+            if model == 'UAL6':
+                picture = "/local/images/unifiap62.png"
+            elif model == 'U7IW':
+                picture = "/local/images/unifiapiw2.png"
+            elif model == 'UHDIW':
+                picture = "/local/images/unifiapiw2.png"
+            else:
+                picture = "/local/images/unifiap62.png"
             self.set_state(entity, state = numclients, attributes = {"entity_picture":picture, "Clients":numclients, "Guests":numguests, "Clients_wifi0":wifi0clients, "Clients_wifi1":wifi1clients, "Score":score, "CPU":str(cpu), "RAM":str(ram), "Uptime":uptime, "Activity":str(activity)+' Mbps', "Update":update})
 
     def update_switches(self, kwargs):
@@ -94,6 +105,7 @@ class UnifiAPSW(hass.Hass):
                     self.log(str(switch['name']) + ' Port ' + str(x+1) + ' ' + str(port_name) + ': ' + str(poe_power) + 'W' + ' ' + str(poe_voltage) + 'V')
                     self.set_state(entity + "_port" + str(x+1) + "_power", state = poe_power, attributes = {"friendly_name": port_name, "device_class": "power", "unit_of_measurement": "W", "model": model})
                     self.set_state(entity + "_port" + str(x+1) + "_voltage", state = poe_voltage, attributes = {"friendly_name": port_name, "device_class": "voltage", "unit_of_measurement": "V", "model": model})
+
                 port_link_state = "on" if port['up'] == True else "off"
                 port_speed = port['speed']
                 self.log(str(switch['name']) + ' Port ' + str(x+1) + ' ' + str(port_name) + " is " + str(port_link_state))
