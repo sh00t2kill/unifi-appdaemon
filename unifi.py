@@ -12,7 +12,10 @@ class UnifiAPSW(hass.Hass):
         self.password = self.args['pass']
         self.host     = self.args['host']
         self.port     = self.args['port']
-
+        if 'site_id' in self.args:
+            self.site_id = self.args['site_id']
+        else:
+            self.site_id = 'default'
         self.client = self.get_login_client()
 
         self.log("Unifi AP and Switches Started")
@@ -32,9 +35,9 @@ class UnifiAPSW(hass.Hass):
 
     def get_login_client(self):
         try:
-            client = Controller(self.host, self.username, self.password, self.port, 'UDMP-unifiOS', site_id='default', ssl_verify=False)
+            client = Controller(self.host, self.username, self.password, self.port, 'UDMP-unifiOS', site_id=self.site_id, ssl_verify=False)
         except APIError:
-            client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
+            client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id=self.site_id, ssl_verify=False)
         return client
 
 
