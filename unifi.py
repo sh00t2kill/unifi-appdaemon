@@ -47,12 +47,11 @@ class UnifiAPSW(hass.Hass):
 
     def update_aps(self, kwargs):
         self.log("Update APs Started")
-        #client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
         for ap in self.args['aps']:
             entity = "sensor.unifi_" + ap['name'] + "_ap"
             stat = self.client.get_sysinfo()
             devs = self.client.get_device_stat(ap['mac'])
-            #self.log(devs)
+            self.set_state(entity + "_ip", state = devs['ip'], friendly_name = ap['name'].title() + " IP Address")
             clients = self.client.get_clients()
             numclients = int(devs['user-wlan-num_sta'])
             self.set_state(entity + "_clients", state = numclients, friendly_name = ap['name'].title() + " AP Clients", unit_of_measurement = "Clients")
@@ -83,12 +82,12 @@ class UnifiAPSW(hass.Hass):
 
     def update_switches(self, kwargs):
         self.log("Update Switches Started")
-        #client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
         for switch in self.args['switches']:
             entity = "sensor.unifi_" + switch['name']
             devs = self.client.get_device_stat(switch['mac'])
             model = devs['model']
-            self.log('Switch Model: ' + model)
+            self.log('Switch Model: ' + model + " : " + devs['ip'])
+            self.set_state(entity + "_ip", state = devs['ip'], friendly_name = switch['name'].title() + " IP Address") 
             for x in range(len(devs['port_table'])):
                 port = devs['port_table'][x]
                 port_poe = port['port_poe']
@@ -108,7 +107,6 @@ class UnifiAPSW(hass.Hass):
 
     def update_health(self, kwargs):
         self.log("Update Health Started")
-        #client = Controller(self.host, self.username, self.password, self.port, 'v6', site_id='default', ssl_verify=False)
         target_mac = self.args["gateway_mac"]
         health = self.client.get_healthinfo()
         wirelessclients = int(health[0]['num_user'])
