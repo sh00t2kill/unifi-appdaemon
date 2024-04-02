@@ -50,6 +50,11 @@ class UnifiAPSW(hass.Hass):
     def update_wan(self, kwards):
         self.log("Updating WAN stats")
         gw = self.client.get_device_stat(self.args["gateway_mac"])
+        entity = "sensor.unifi_gw_"
+        uplink = gw["uplink"]["ip"]
+        latency = gw["uplink"]["latency"]
+        self.set_state(entity + "uplink_ip", state = uplink, friendly_name = "Uplink IP Address")
+        self.set_state(entity + "uplink_latency", state = latency, friendly_name = "Uplink Latency", unit_of_measurement = "s")
         wan_stats = {
             "wan_rxp": gw["stat"]["gw"]["wan-rx_packets"],
             "wan_txp": gw["stat"]["gw"]["wan-tx_packets"],
@@ -57,7 +62,6 @@ class UnifiAPSW(hass.Hass):
             "wan_txb": gw["stat"]["gw"]["wan-tx_bytes"],
         }
         for key, value in wan_stats.items():
-            entity = "sensor.unifi_gw_"
             self.set_state(entity + key, state = value, friendly_name = key.replace("_", " ").title(), unit_of_measurement = key[-1])
             if key[-1] == "b":
                 # We have a measurement in bytes, lets add a new one for MB
