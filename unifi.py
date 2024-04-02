@@ -59,6 +59,12 @@ class UnifiAPSW(hass.Hass):
         for key, value in wan_stats.items():
             entity = "sensor.unifi_gw_"
             self.set_state(entity + key, state = value, friendly_name = key.replace("_", " ").title(), unit_of_measurement = key[-1])
+            if key[-1] == "b":
+                # We have a measurement in bytes, lets add a new one for MB
+                bytes = value
+                mb_value = round(bytes * 0.000001, 2)
+                new_name = key.replace("xb","xmb")
+                self.set_state(entity + new_name, state = mb_value, friendly_name = new_name.replace("_", " ").title(), unit_of_measurement = "MB")
         
         
     
