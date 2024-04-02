@@ -26,6 +26,8 @@ class UnifiAPSW(hass.Hass):
         self.run_every(self.update_switches, datetime.datetime.now(), 60)
         self.run_in(self.update_health, 0)
         self.run_every(self.update_health, datetime.datetime.now(), 60)
+        self.run_in(self.update_wan, 0)
+        self.run_every(self.update_wan, datetime.datetime.now(), 60)
         self.listen_event(self.unifi_update_event, "UNIFI_UPDATE")
 
         self.run_every(self.login_client,  datetime.datetime.now(), 1200)
@@ -45,6 +47,21 @@ class UnifiAPSW(hass.Hass):
         self.run_in(self.update_aps, 0)
         self.run_in(self.update_switches, 0)
 
+    def update_wan(self, kwards):
+        self.log("Updating WAN stats")
+        gw = self.client.get_device_stat(self.args["gateway_mac"])
+        wan_stats = {
+            "wan_rxp": gw["stat"]["gw"]["wan-rx_packets"],
+            "wan_txp": gw["stat"]["gw"]["wan-tx_packets"],
+            "wan_rxb": gw["stat"]["gw"]["wan-rx_bytes"],
+            "wan_txb": gw["stat"]["gw"]["wan-tx_bytes"],
+        }
+        for key, value in wan_stats.items():
+            entity = "sensor.unifi_gw_"
+            self.set_state(entity + key, state = value, friendly_name = key.replace("_", " ").title())
+        
+        
+    
     def update_aps(self, kwargs):
         self.log("Update APs Started")
         for ap in self.args['aps']:
