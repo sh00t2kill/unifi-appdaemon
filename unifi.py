@@ -58,7 +58,7 @@ class UnifiAPSW(hass.Hass):
         }
         for key, value in wan_stats.items():
             entity = "sensor.unifi_gw_"
-            self.set_state(entity + key, state = value, friendly_name = key.replace("_", " ").title())
+            self.set_state(entity + key, state = value, friendly_name = key.replace("_", " ").title(), unit_of_measurement = key[-1])
         
         
     
@@ -95,7 +95,7 @@ class UnifiAPSW(hass.Hass):
             wifi1clients = int(devs['radio_table_stats'][1]['user-num_sta'])
             self.set_state(entity + "_5ghz_clients", state = wifi1clients, friendly_name = ap['name'].title() + " AP 5GHz Clients", unit_of_measurement = "Clients")
             self.log(entity)
-            self.set_state(entity, state = numclients, attributes = {"entity_picture":picture, "Clients":numclients, "Guests":numguests, "Clients_wifi0":wifi0clients, "Clients_wifi1":wifi1clients, "Score":score, "CPU":str(cpu), "RAM":str(ram), "Uptime":uptime, "Activity":str(activity)+' Mbps', "Update":update})
+            self.set_state(entity, state = numclients, attributes = {"Clients":numclients, "Guests":numguests, "Clients_wifi0":wifi0clients, "Clients_wifi1":wifi1clients, "Score":score, "CPU":str(cpu), "RAM":str(ram), "Uptime":uptime, "Activity":str(activity)+' Mbps', "Update":update})
 
     def update_switches(self, kwargs):
         self.log("Update Switches Started")
