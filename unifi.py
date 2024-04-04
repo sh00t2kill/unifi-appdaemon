@@ -20,16 +20,19 @@ class UnifiAPSW(hass.Hass):
 
         self.log("Unifi AP and Switches Started")
         self.log("Logging in to Unifi Controller")
-        self.run_in(self.update_aps, 0)
-        self.run_every(self.update_aps, datetime.datetime.now(), 60)
-        self.run_in(self.update_switches, 0)
-        self.run_every(self.update_switches, datetime.datetime.now(), 60)
-        self.run_in(self.update_health, 0)
-        self.run_every(self.update_health, datetime.datetime.now(), 60)
-        self.run_in(self.update_wan, 0)
-        self.run_every(self.update_wan, datetime.datetime.now(), 60)
+        if "aps" in self.args:
+            self.run_in(self.update_aps, 0)
+            self.run_every(self.update_aps, datetime.datetime.now(), 60)
+        if "switches" in self.args:
+            self.run_in(self.update_switches, 0)
+            self.run_every(self.update_switches, datetime.datetime.now(), 60)
+        if "gateway_mac" in self.args:
+            self.run_in(self.update_health, 0)
+            self.run_every(self.update_health, datetime.datetime.now(), 60)
+            self.run_in(self.update_wan, 0)
+            self.run_every(self.update_wan, datetime.datetime.now(), 60)
+        
         self.listen_event(self.unifi_update_event, "UNIFI_UPDATE")
-
         self.run_every(self.login_client,  datetime.datetime.now(), 1200)
 
     def login_client(self):
