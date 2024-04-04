@@ -48,6 +48,8 @@ class UnifiAPSW(hass.Hass):
         self.run_in(self.update_switches, 0)
 
     def update_wan(self, kwards):
+        if "gateway_mac" not in self.args:
+            return None
         self.log("Updating WAN stats")
         gw = self.client.get_device_stat(self.args["gateway_mac"])
         entity = "sensor.unifi_gw_"
@@ -133,6 +135,8 @@ class UnifiAPSW(hass.Hass):
                 self.set_state(entity + "_port" + str(x+1) + "_speed", state = port_speed, attributes = {"friendly_name": port_name, "device_class": "connectivity", "unit_of_measurement": "Mbps", "model": model})
 
     def update_health(self, kwargs):
+        if "gateway_mac" not in self.args:
+            return None
         self.log("Update Health Started")
         target_mac = self.args["gateway_mac"]
         health = self.client.get_healthinfo()
