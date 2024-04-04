@@ -46,16 +46,17 @@ Create sensor for link speed<br>
 If switch port is POE, create sensors for port voltage and power<br>
 
 For the configured gateway, some health stats and WAN usage sensors are created.<br>
-wireless clients<br>
-wired clients<br>
-isp up<br>
-isp down<br>
-memory<br>
-cpu<br>
-wan-rx bytes<br>
-wan-rx MB<br>
-wan-tx bytes<br>
-wan-tx MB<br>
-
+<ul>
+<li>wireless clients
+<li>wired clients</li>
+<li>isp up</li>
+<li>isp down</li>
+<li>memory</li>
+<li>cpu</li>
+<li>wan-rx bytes</li>
+<li>wan-rx MB</li>
+<li>wan-tx bytes</li>
+<li>wan-tx MB</li>
+</ul>
 
 Note, `gateway_mac`, `switches` and `aps` are all optional. If the config option isnt set, the relevant functions do not run and sensors are not created or updated.
