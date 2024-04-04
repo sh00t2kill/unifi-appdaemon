@@ -45,6 +45,17 @@ Create binary_sensor for connected or not<br>
 Create sensor for link speed<br>
 If switch port is POE, create sensors for port voltage and power<br>
 
-For the configured gateway, some health stats and WAN usage sensors are created.
+For the configured gateway, some health stats and WAN usage sensors are created.<br>
+wireless clients<br>
+wired clients<br>
+isp up<br>
+isp down<br>
+memory<br>
+cpu<br>
+wan-rx bytes<br>
+wan-rx MB<br>
+wan-tx bytes<br>
+wan-tx MB<br>
+
 
 Note, `gateway_mac`, `switches` and `aps` are all optional. If the config option isnt set, the relevant functions do not run and sensors are not created or updated.
