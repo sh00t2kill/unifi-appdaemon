@@ -44,3 +44,7 @@ For every switch configured:<br>
 Create binary_sensor for connected or not<br>
 Create sensor for link speed<br>
 If switch port is POE, create sensors for port voltage and power<br>
+
+For the configured gateway, some health stats and WAN usage sensors are created.
+
+Note, `gateway_mac`, `switches` and `aps` are all optional. If the config option isnt set, the relevant functions do not run and sensors are not created or updated.
