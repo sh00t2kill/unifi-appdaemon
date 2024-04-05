@@ -23,25 +23,19 @@ class UnifiAPSW(hass.Hass):
         if "aps" in self.args:
             self.run_in(self.update_aps, 0)
             self.run_every(self.update_aps, datetime.datetime.now(), 60)
-        else:
-            self.log("No APs configured -- skipping")
         if "switches" in self.args:
             self.run_in(self.update_switches, 0)
             self.run_every(self.update_switches, datetime.datetime.now(), 60)
-        else:
-            self.log("No switches configured -- skipping")
         if "gateway_mac" in self.args:
             self.run_in(self.update_health, 0)
             self.run_every(self.update_health, datetime.datetime.now(), 60)
             self.run_in(self.update_wan, 0)
             self.run_every(self.update_wan, datetime.datetime.now(), 60)
-        else:
-            self.log("No gateway configured -- skipping")
 
         self.listen_event(self.unifi_update_event, "UNIFI_UPDATE")
         self.run_every(self.login_client,  datetime.datetime.now(), 1200)
 
-    def login_client(self):
+    def login_client(self, kwargs):
         self.client = self.get_login_client()
 
     def get_login_client(self):
@@ -79,10 +73,17 @@ class UnifiAPSW(hass.Hass):
                 bytes = value
                 mb_value = round(bytes / 1048576, 2)
                 new_name = key.replace("xb","xmb")
+                current_state = self.get_state(entity + new_name)
                 self.set_state(entity + new_name, state = mb_value, friendly_name = new_name.replace("_", " ").title(), unit_of_measurement = "MB")
-        
-        
-    
+
+                if current_state and float(current_state) > 0:
+                    # convert bytes/min to megabits/second
+                    diff_mb = mb_value - float(current_state)
+                    mbps = round(diff_mb * 0.133333, 2)
+                    mbps_name = key.replace("xb", "xmbps")
+                    self.set_state(entity + mbps_name, state=mbps, friendly_name = mbps_name.replace("_", " ").title(), unit_of_measurement = "Mbps")
+
+
     def update_aps(self, kwargs):
         self.log("Update APs Started")
         for ap in self.args['aps']:
@@ -125,7 +126,7 @@ class UnifiAPSW(hass.Hass):
             devs = self.client.get_device_stat(switch['mac'])
             model = devs['model']
             self.log('Switch Model: ' + model + " : " + devs['ip'])
-            self.set_state(entity + "_ip", state = devs['ip'], friendly_name = switch['name'].title() + " IP Address") 
+            self.set_state(entity + "_ip", state = devs['ip'], friendly_name = switch['name'].title() + " IP Address")
             for x in range(len(devs['port_table'])):
                 port = devs['port_table'][x]
                 port_poe = port['port_poe']
